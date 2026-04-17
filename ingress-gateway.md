@@ -26,11 +26,29 @@ Fixed all the above problems:
 Internet → ALB (shared) → pod (directly)
 ```
 
-But Ingress itself still has problems — see below.
+## What Changed in the API
+
+| | v1beta1 (old) | v1 (current) |
+|---|---|---|
+| apiVersion | `extensions/v1beta1` → `networking.k8s.io/v1beta1` | `networking.k8s.io/v1` |
+| backend | flat: `serviceName`, `servicePort` | nested: `service.name`, `service.port.number` |
+| pathType | not required | mandatory |
+| ingressClassName | annotation | spec field |
+
+## pathType
+
+| pathType | Behavior |
+|---|---|
+| `Exact` | `/api` matches only `/api` |
+| `Prefix` | `/api` matches `/api`, `/api/users`, `/api/orders` |
+| `ImplementationSpecific` | controller decides |
+
+
+But Ingress itself still has problems
 
 ---
 
-## Problems with Ingress API (Why Move to Gateway)
+## Problems with Ingress API
 
 **1. Annotation hell**
 Any feature beyond basic host/path routing goes into annotations — no validation, no schema, easy to mistype. And annotations are vendor-specific, so nginx annotations don't work on ALB and vice versa.
@@ -62,23 +80,6 @@ Same ALB underneath — only the K8s side is cleaner. Dev team only touches HTTP
 **Status:** GA since K8s 1.31. Ingress is in maintenance mode — no new features.
 
 ---
-
-## What Changed in the API (Interview)
-
-| | v1beta1 (old) | v1 (current) |
-|---|---|---|
-| apiVersion | `extensions/v1beta1` → `networking.k8s.io/v1beta1` | `networking.k8s.io/v1` |
-| backend | flat: `serviceName`, `servicePort` | nested: `service.name`, `service.port.number` |
-| pathType | not required | mandatory |
-| ingressClassName | annotation | spec field |
-
-## pathType
-
-| pathType | Behavior |
-|---|---|
-| `Exact` | `/api` matches only `/api` |
-| `Prefix` | `/api` matches `/api`, `/api/users`, `/api/orders` |
-| `ImplementationSpecific` | controller decides |
 
 
 # Why Move from Kubernetes Ingress to Gateway API
